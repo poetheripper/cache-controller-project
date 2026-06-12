@@ -57,10 +57,15 @@ end
 
 // LRU victim: the way whose age == 3
 always @(*) begin
-    if(age[index][0] == 2'd3) lru_way = 2'd0;
-    else if(age[index][1] == 2'd3) lru_way = 2'd1;
-    else if (age[index][2] == 2'd3) lru_way = 2'd2;
-    else                            lru_way = 2'd3;
+    if(age[index][0] == 2'd3) begin 
+        lru_way = 2'd0;
+    end else if(age[index][1] == 2'd3) begin
+        lru_way = 2'd1;
+    end else if(age[index][2] == 2'd3) begin
+        lru_way = 2'd2;
+    end else                            
+        lru_way = 2'd3;
+    end
 end
 
 endmodule
