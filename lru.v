@@ -3,11 +3,9 @@ module lru #(
 )(
     input clk,
     input rst_b,
-
     input [6:0] index,
     input update_en,
     input [1:0] update_way,
-
     output reg [1:0] lru_way
 );
 
@@ -17,12 +15,10 @@ reg [1:0] age [0:NUM_SETS-1][0:3];
 
 integer i, j;
 
-
-// Update age counters on access
+// update age counters on access
 always @(posedge clk or negedge rst_b) begin
     if (!rst_b) begin
         // way0=0, way1=1, way2=2, way3=3
-        // valid initial LRU order 
         for (i = 0; i < NUM_SETS; i = i + 1) begin
             age[i][0] <= 2'd0;
             age[i][1] <= 2'd1;
@@ -31,12 +27,12 @@ always @(posedge clk or negedge rst_b) begin
         end
     end
     else if (update_en) begin
-        // age the accessed way to 0, increment all others (cap at 3)
+        // age the accessed way to 0, increment all others
         if (update_way != 2'd0)
             age[index][0] <= (age[index][0] == 2'd3) ? 2'd3 : age[index][0] + 1;
         else
             age[index][0] <= 2'd0;
-
+        
         if (update_way != 2'd1)
             age[index][1] <= (age[index][1] == 2'd3) ? 2'd3 : age[index][1] + 1;
         else
@@ -55,7 +51,7 @@ always @(posedge clk or negedge rst_b) begin
 end
 
 
-// LRU victim: the way whose age == 3
+// LRU -> the way whose age == 3
 always @(*) begin
     if(age[index][0] == 2'd3) begin 
         lru_way = 2'd0;
