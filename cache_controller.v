@@ -3,20 +3,6 @@
 `include "hit_detector.v"
 `include "lru.v"
 
-// Instantiates and connects:
-// -cache_mem: the 4-way storage array
-// -hit_detector: tag comparator, produces hit + hit_way
-// -fsm: controls state transitions and signals
-// -lru: age-counter based LRU victim selector
-//
-// Address breakdown (32-bit):
-// [31:13]= TAG(19 bits)
-// [12:6]= INDEX(7 bits)
-// [5:0]= OFFSET(6 bits)
-//
-// Write policy : write-back + write-allocate
-// Replacement  : LRU
-
 module cache_controller (
     input clk,
     input rst_b,
@@ -27,14 +13,14 @@ module cache_controller (
     input op_write,   
     input [511:0] cpu_data_in, 
 
-    // Memory interface
+    // memory
     input [511:0] mem_data_in, // block fetched from main memory (on read miss)
 
-    // Outputs to CPU
+    // outputs to CPU
     output [511:0] data_out,  // block returned to CPU on read hit
     output ready,     // 1 = operation complete this cycle
 
-    // Outputs to memory controller
+    // outputs to memory controller
     output mem_read,  // 1 = fetch block from main memory
     output mem_write, // 1 = write block back to main memory
     output [31:0] mem_addr,  // address for memory operation
@@ -44,10 +30,6 @@ module cache_controller (
 
 wire [18:0] addr_tag = addr[31:13];
 wire [6:0] addr_index = addr[12:6];
-// addr[5:0] is the byte offset - used outside this module
-
-// Internal wires between modules
-
 
 // cache_mem outputs
 wire [18:0] tag0, tag1, tag2, tag3;
@@ -67,8 +49,6 @@ wire cache_write;
 
 // lru output
 wire [1:0] lru_way;
-
-
 wire [1:0] write_way = hit ? hit_way : lru_way;
 
 
@@ -145,8 +125,7 @@ assign data_out = data_out_reg;
 wire lru_update_en = cache_write;
 wire [1:0] lru_update_way = hit ? hit_way : lru_way;
 
-// Module instantiations
-
+// module instantiations
 cache_mem u_cache_mem (
     .clk(clk),
     .rst_b(rst_b),
