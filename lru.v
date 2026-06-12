@@ -63,7 +63,7 @@ always @(*) begin
         lru_way = 2'd1;
     end else if(age[index][2] == 2'd3) begin
         lru_way = 2'd2;
-    end else                            
+    end else begin                            
         lru_way = 2'd3;
     end
 end
