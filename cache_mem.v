@@ -63,17 +63,9 @@ always @(posedge clk or negedge rst_b) begin
 
                 valid_mem[i][j] <= 1'b0;
                 dirty_mem[i][j] <= 1'b0;
-
-                //tag_mem[i][j] <= 19'd0;    //Invalid lines are ignored 
-                //data_mem[i][j] <= 512'd0;
-
             end
         end
-
-    end
-
-    else if(write_en) begin
-
+    end else if(write_en) begin
         data_mem[index][write_way] <= data_in;
         tag_mem[index][write_way]  <= tag_in;
 
