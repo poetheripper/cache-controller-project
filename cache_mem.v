@@ -54,7 +54,7 @@ reg dirty_mem [0:NUM_SETS-1][0:NUM_WAYS-1];
 integer i,j;
 
 always @(posedge clk or negedge rst_b) begin
-
+  
     if(!rst_b) begin
 
         for(i=0;i<NUM_SETS;i=i+1) begin
