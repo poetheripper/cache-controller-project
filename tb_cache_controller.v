@@ -60,6 +60,21 @@ always #5 clk = ~clk;
 integer pass_cnt = 0;
 integer fail_cnt = 0;
 
+
+//For miss rate and AMAT
+integer total_accesses = 0;
+integer total_hits = 0;
+
+//For miss rate
+always @(posedge clk) begin
+if(op_read || op_write) begin
+        total_accesses = total_accesses + 1;
+
+        if(dut.hit)
+            total_hits = total_hits + 1;
+end
+end
+
 //Adress builder
 function [31:0] make_addr;
     input [18:0] tag;
@@ -145,6 +160,8 @@ initial begin
     addr        = 32'd0;
     cpu_data_in = 512'd0;
     mem_data_in = 512'd0;
+    
+    
 
     // ==========================================================
     // TEST 1 - Reset
@@ -434,6 +451,13 @@ initial begin
         $display("  ALL TESTS PASSED");
     else
         $display("  SOME TESTS FAILED - check output above");
+      
+    $display("\n=====================================================");  
+    $display("Total accesses = %0d", total_accesses);
+    $display("Total hits = %0d", total_hits);
+    $display("Hit Rate = %f %%", 100.0 * total_hits / total_accesses);  //hit rate
+    $display("Miss Rate = %f %%", 100-(100.0 * total_hits / total_accesses)); //miss rate = 1 - hit rate
+    $display("\n=====================================================");
 
     $finish;
 end
