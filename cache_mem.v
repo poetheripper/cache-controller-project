@@ -45,8 +45,8 @@ localparam NUM_WAYS = 4;
 localparam TAG_BITS = 19;
 localparam DATA_BITS = 512;
 
-reg [DATA_BITS-1:0] data_mem  [0:NUM_SETS-1][0:NUM_WAYS-1];
-reg [TAG_BITS-1:0]  tag_mem   [0:NUM_SETS-1][0:NUM_WAYS-1];
+reg [DATA_BITS-1:0] data_mem [0:NUM_SETS-1][0:NUM_WAYS-1];
+reg [TAG_BITS-1:0]  tag_mem [0:NUM_SETS-1][0:NUM_WAYS-1];
 
 reg valid_mem [0:NUM_SETS-1][0:NUM_WAYS-1];
 reg dirty_mem [0:NUM_SETS-1][0:NUM_WAYS-1];
