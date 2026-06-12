@@ -1,12 +1,12 @@
 module lru #(
     parameter NUM_SETS = 128
 )(
-    input            clk,
-    input            rst_b,
+    input clk,
+    input rst_b,
 
-    input     [6:0]  index,
-    input            update_en,
-    input     [1:0]  update_way,
+    input [6:0] index,
+    input update_en,
+    input [1:0] update_way,
 
     output reg [1:0] lru_way
 );
@@ -57,8 +57,8 @@ end
 
 // LRU victim: the way whose age == 3
 always @(*) begin
-    if      (age[index][0] == 2'd3) lru_way = 2'd0;
-    else if (age[index][1] == 2'd3) lru_way = 2'd1;
+    if(age[index][0] == 2'd3) lru_way = 2'd0;
+    else if(age[index][1] == 2'd3) lru_way = 2'd1;
     else if (age[index][2] == 2'd3) lru_way = 2'd2;
     else                            lru_way = 2'd3;
 end
