@@ -2,23 +2,23 @@
 
 module tb_cache_mem;
 
-    reg         clk;
-    reg         rst_b;
+    reg clk;
+    reg rst_b;
 
-    reg  [6:0]  index;
-    reg         write_en;
-    reg  [1:0]  write_way;
-    reg  [18:0] tag_in;
-    reg  [511:0] data_in;
-    reg         valid_in;
-    reg         dirty_in;
+    reg [6:0] index;
+    reg write_en;
+    reg [1:0] write_way;
+    reg [18:0] tag_in;
+    reg [511:0] data_in;
+    reg valid_in;
+    reg dirty_in;
 
     wire [18:0] tag0,  tag1,  tag2,  tag3;
-    wire        valid0, valid1, valid2, valid3;
-    wire        dirty0, dirty1, dirty2, dirty3;
+    wire valid0, valid1, valid2, valid3;
+    wire dirty0, dirty1, dirty2, dirty3;
     wire [511:0] data0, data1, data2, data3;
 
-    //Instantiate cache_mem
+    // module instantiations
     cache_mem dut (
         .clk       (clk),
         .rst_b     (rst_b),
@@ -34,19 +34,13 @@ module tb_cache_mem;
         .dirty0    (dirty0), .dirty1(dirty1), .dirty2(dirty2), .dirty3(dirty3),
         .data0     (data0),  .data1 (data1),  .data2 (data2),  .data3 (data3)
     );
-
     
     initial clk = 0;
     always #5 clk = ~clk;
 
-  
-    // Pass/fail counter
     integer pass_cnt = 0;
     integer fail_cnt = 0;
 
-   
-
-    // task is like a function
     task do_write;
         input [6:0]   t_index;
         input [1:0]   t_way;
@@ -55,7 +49,7 @@ module tb_cache_mem;
         input         t_valid;
         input         t_dirty;
         begin
-            @(negedge clk);          // set inputs before rising edge
+            @(negedge clk);          
             index     = t_index;
             write_way = t_way;
             tag_in    = t_tag;
@@ -63,13 +57,12 @@ module tb_cache_mem;
             valid_in  = t_valid;
             dirty_in  = t_dirty;
             write_en  = 1'b1;
-            @(posedge clk);          // latch on rising edge
+            @(posedge clk);          
             #1;                      
             write_en  = 1'b0;
         end
     endtask
 
-    // Point the read index and wait a little for combinational outputs
     task do_read;
         input [6:0] t_index;
         begin
@@ -80,7 +73,6 @@ module tb_cache_mem;
         end
     endtask
 
-    // Check a single way's outputs
     task check_way;
         input [1:0]   way;
         input [18:0]  exp_tag;
@@ -124,7 +116,6 @@ module tb_cache_mem;
         $display("  cache_mem Testbench");
         $display("===================================================");
 
-        //initialise inputs
         rst_b     = 1'b1;
         write_en  = 1'b0;
         index     = 7'd0;
@@ -137,12 +128,11 @@ module tb_cache_mem;
       
         // TEST 1: Reset clears all valid & dirty bits
         $display("\n--- TEST 1: Reset ---");
-        rst_b = 1'b0;           // assert reset
+        rst_b = 1'b0;         
         repeat(3) @(posedge clk);
         #1;
-        rst_b = 1'b1;           // deassert reset
+        rst_b = 1'b1;       
 
-        // Check a few sets after reset
         do_read(7'd0);
         if (valid0===1'b0 && valid1===1'b0 && valid2===1'b0 && valid3===1'b0) begin
             $display("PASS  set=0: all valid bits 0 after reset");
@@ -170,7 +160,7 @@ module tb_cache_mem;
             fail_cnt = fail_cnt + 1;
         end
 
-        // TEST 2:€“ Write to each of the 4 ways at set 0
+        // TEST 2: Write to each of the 4 ways at set 0
         $display("\n--- TEST 2: Write all 4 ways at set 0 ---");
         do_write(7'd0, 2'd0, 19'h7_CAFE, 512'hAAAA_0000, 1'b1, 1'b0);
         do_write(7'd0, 2'd1, 19'h5_BEEF, 512'hBBBB_1111, 1'b1, 1'b1);
@@ -185,17 +175,14 @@ module tb_cache_mem;
 
     
         // TEST 3: Write to a different set (set 42) and verify
-        //          set 0 is unaffected (way independence)  
         $display("\n--- TEST 3: Set independence (set 42 vs set 0) ---");
         do_write(7'd42, 2'd0, 19'h1_1111, {512{1'b1}}, 1'b1, 1'b1);
         do_write(7'd42, 2'd3, 19'h2_2222, 512'hDEAD_BEEF, 1'b1, 1'b0);
 
-        // Verify set 42
         do_read(7'd42);
         check_way(2'd0, 19'h1_1111, {512{1'b1}},    1'b1, 1'b1);
         check_way(2'd3, 19'h2_2222, 512'hDEAD_BEEF, 1'b1, 1'b0);
 
-        // Verify set 0 unchanged
         do_read(7'd0);
         check_way(2'd0, 19'h7_CAFE, 512'hAAAA_0000, 1'b1, 1'b0);
         check_way(2'd1, 19'h5_BEEF, 512'hBBBB_1111, 1'b1, 1'b1);
@@ -207,7 +194,7 @@ module tb_cache_mem;
 
         do_read(7'd0);
         check_way(2'd1, 19'h0_1234, 512'h9999_5678, 1'b1, 1'b1);
-        // Other ways at set 0 should be unchanged
+
         check_way(2'd0, 19'h7_CAFE, 512'hAAAA_0000, 1'b1, 1'b0);
         check_way(2'd2, 19'h3_DEAD, 512'hCCCC_2222, 1'b1, 1'b0);
 
@@ -217,11 +204,11 @@ module tb_cache_mem;
         @(negedge clk);
         index     = 7'd0;
         write_way = 2'd0;
-        tag_in    = 19'h7_FFFF;   // different value
+        tag_in    = 19'h7_FFFF;  
         data_in   = {512{1'b1}};
         valid_in  = 1'b0;
         dirty_in  = 1'b0;
-        write_en  = 1'b0;         // NOT enabling write
+        write_en  = 1'b0;         
         @(posedge clk); #1;
 
         do_read(7'd0);
@@ -238,18 +225,18 @@ module tb_cache_mem;
         check_way(2'd3, 19'h0_0001, 512'hABCD_EF01, 1'b0, 1'b0);
 
         
-        // TEST 7:€“ Reset clears previously written data
+        // TEST 7: Reset clears previously written data
         $display("\n--- TEST 7: Reset after writes ---");
         rst_b = 1'b0;
         repeat(3) @(posedge clk);
         rst_b = 1'b1;
         @(posedge clk); #2;
 
-        // check set 0
+
         write_en = 1'b0;
         index = 7'd0;
         #2;
-        if (valid0===1'b0 && dirty0===1'b0 &&        //if a block is invalid we don't care about the tag
+        if (valid0===1'b0 && dirty0===1'b0 &&        
             valid1===1'b0 && dirty1===1'b0) begin
             $display("PASS  set=0 cleared after second reset");
             pass_cnt = pass_cnt + 1;
@@ -259,7 +246,7 @@ module tb_cache_mem;
             fail_cnt = fail_cnt + 1;
         end
 
-        // check set 127
+
         index = 7'd127;
         #2;
         if (valid0===1'b0 && dirty0===1'b0) begin
